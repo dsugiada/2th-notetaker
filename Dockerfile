@@ -30,9 +30,6 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Make sure the .bin folder is in PATH for executable Node module binaries
-RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
-
 # Expose the port your app runs on
 EXPOSE 3000
 
