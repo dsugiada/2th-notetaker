@@ -1,10 +1,10 @@
-# Use an official Node runtime as a parent image
-FROM node:16
+# Stage 1: Building the app
+FROM node:16 AS builder
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+# Set the working directory
+WORKDIR /app
 
-# Copy package.json and package-lock.json to leverage Docker cache
+# Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
 
 # Install dependencies, consider using --only=production for production builds
@@ -14,15 +14,27 @@ RUN if [ "$NODE_ENV" = "production" ]; \
     else npm install; \
     fi
 
-# Bundle your app's source code inside the Docker image
+# Copy the rest of your application code
 COPY . .
 
-# Make port 3000 available to the world outside this container
+# Build your Next.js application
+RUN npm run build
+
+# Stage 2: Setting up the production environment
+FROM node:16 AS runner
+
+WORKDIR /app
+
+# Copy the build output from the previous stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+
+# Make sure the .bin folder is in PATH for executable Node module binaries
+RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Use an argument to set the NODE_ENV environment variable
-ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV}
-
-# Run the app when the container launches
-CMD ["node", "app.js"]
+# Command to run your app
+CMD ["npm", "start"]
