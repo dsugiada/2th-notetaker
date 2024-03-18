@@ -50,6 +50,12 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        dark: {
+          background: 'hsl(250, 30%, 20%)', // dark purple background
+          foreground: 'hsl(250, 20%, 80%)', // lighter purple foreground
+          border: 'hsl(250, 15%, 50%)',     // purple border
+        },
+        //navigation-sidebar: dark:bg-[#13121D]
       },
       borderRadius: {
         lg: "var(--radius)",
