@@ -1,5 +1,5 @@
 "use client";
-
+//This is the socket indicator on the top RHS
 import { useSocket } from "@/components/providers/socket-provider";
 import { Badge } from "@/components/ui/badge";
 

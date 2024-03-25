@@ -78,14 +78,15 @@ npx prisma db push
 ### Start the app
 
 ```shell
-npm run dev
+npx next dev
 ```
 
 ## Available commands
 
-Running commands with npm `npm run [command]`
+Running commands with npm `npx next [command]`
 
 | command         | description                              |
 | :-------------- | :--------------------------------------- |
 | `dev`           | Starts a development instance of the app |
-| `prod`          | Starts a production instance of the app  |
+| `build`         | Build a production instance of the app   |
+| `start -p 8080` | Starts a production instance of the app  |

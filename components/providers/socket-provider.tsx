@@ -31,14 +31,14 @@ export const SocketProvider = ({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = new (ClientIO as any)(process.env.NEXT_PUBLIC_SITE_URL!, {
+    const socketInstance = new (ClientIO as any)(process.env.NEXT_PUBLIC_SITE_URL!, { //NEXT_PUBLIC_SITE_URL should be the public URL
       path: "/api/socket/io",
       addTrailingSlash: false,
     });
 
     socketInstance.on("connect", () => {
       setIsConnected(true);
-    });
+    }); //Receipt of "connect" message
 
     socketInstance.on("disconnect", () => {
       setIsConnected(false);

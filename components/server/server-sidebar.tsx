@@ -81,7 +81,7 @@ export const ServerSidebar = async ({
           <ServerSearch
             data={[
               {
-                label: "Text Channels",
+                label: "Patients",
                 type: "channel",
                 data: textChannels?.map((channel) => ({
                   id: channel.id,
