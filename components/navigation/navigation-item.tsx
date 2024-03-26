@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { ActionTooltip } from "@/components/action-tooltip";
-import Icon from '@/components/ui/icon';
+import { Icon } from '@/components/ui/icon';
 
 interface NavigationItemProps {
   id: string;
