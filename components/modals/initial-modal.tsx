@@ -24,16 +24,29 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectSeparator,
+  SelectValue,
+} from "@/components/ui/select";
 import { FileUpload } from "@/components/file-upload";
 import { useRouter } from "next/navigation";
+
+const ServerType = z.enum(["questionnaire", "mindmapper", "chat"]);
+
+type ServerFormData = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required."
   }),
-  imageUrl: z.string().min(1, {
-    message: "Server image is required."
-  })
+  imageUrl: z.string().optional().or(z.literal("")), // Make imageUrl optional
+  type: z.union([ServerType, z.literal("")]) // Allow empty string as a possible value
+      .refine(type => type !== "", { message: "Please select a server type." }) // Ensure it's not an empty string
 });
 
 export const InitialModal = () => {
@@ -45,17 +58,18 @@ export const InitialModal = () => {
     setIsMounted(true);
   }, []);
 
-  const form = useForm({
+  const form = useForm<ServerFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       imageUrl: "",
+      type: "",
     }
   });
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: ServerFormData) => {
     try {
       await axios.post("/api/servers", values);
 
@@ -94,7 +108,7 @@ export const InitialModal = () => {
                       <FormControl>
                         <FileUpload
                           endpoint="serverImage"
-                          value={field.value}
+                          value={field.value || ""}
                           onChange={field.onChange}
                         />
                       </FormControl>
@@ -125,6 +139,38 @@ export const InitialModal = () => {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field: { onChange, value, ref } }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                      Server type
+                    </FormLabel>
+                    <FormControl>
+                      <Select
+                        value={value} // Manually pass the value
+                        onValueChange={onChange} // Manually handle changes
+                      >
+                        <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
+                          <SelectValue>{value || "Choose type"}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="questionnaire">Questionnaire</SelectItem>
+                            <SelectItem value="mindmapper">Mindmapper</SelectItem>
+                            <SelectItem value="chat">Chat Server</SelectItem>
+                          </SelectGroup>
+                          <SelectSeparator />
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
               <Button variant="primary" disabled={isLoading}>

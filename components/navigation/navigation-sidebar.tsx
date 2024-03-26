@@ -42,6 +42,7 @@ export const NavigationSidebar = async () => {
               id={server.id}
               name={server.name}
               imageUrl={server.imageUrl}
+              type={server.type}
             />
           </div>
         ))}

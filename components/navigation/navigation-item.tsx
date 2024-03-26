@@ -5,17 +5,20 @@ import { useParams, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { ActionTooltip } from "@/components/action-tooltip";
+import Icon from '@/components/ui/icon';
 
 interface NavigationItemProps {
   id: string;
-  imageUrl: string;
+  imageUrl?: string;
   name: string;
+  type: string; // Add a type prop for server type
 };
 
 export const NavigationItem = ({
   id,
   imageUrl,
-  name
+  name,
+  type
 }: NavigationItemProps) => {
   const params = useParams();
   const router = useRouter();
@@ -43,11 +46,16 @@ export const NavigationItem = ({
           "relative group flex mx-3 h-[48px] w-[48px] rounded-[24px] group-hover:rounded-[16px] transition-all overflow-hidden",
           params?.serverId === id && "bg-primary/10 text-primary rounded-[16px]"
         )}>
-          <Image
-            fill
-            src={imageUrl}
-            alt="Channel"
-          />
+          {imageUrl ? (
+            <Image
+              fill
+              src={imageUrl}
+              alt="Channel"
+            />
+          ) : (
+            <Icon type={type} /> // Render the Icon component if no imageUrl is provided
+          )}
+
         </div>
       </button>
     </ActionTooltip>

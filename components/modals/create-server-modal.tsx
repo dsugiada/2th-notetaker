@@ -27,7 +27,6 @@ import {
   Select,
   SelectTrigger,
   SelectContent,
-  SelectLabel,
   SelectGroup,
   SelectItem,
   SelectSeparator,
@@ -37,15 +36,17 @@ import { FileUpload } from "@/components/file-upload";
 import { useRouter } from "next/navigation";
 import { useModal } from "@/hooks/use-modal-store";
 
-
 const ServerType = z.enum(["questionnaire", "mindmapper", "chat"]);
+
+type ServerFormData = z.infer<typeof formSchema>;
 
 const formSchema = z.object({
   name: z.string().min(1, {
     message: "Server name is required."
   }),
   imageUrl: z.string().optional().or(z.literal("")), // Make imageUrl optional
-  type: ServerType
+  type: z.union([ServerType, z.literal("")]) // Allow empty string as a possible value
+      .refine(type => type !== "", { message: "Please select a server type." }) // Ensure it's not an empty string
 });
 
 export const CreateServerModal = () => {
@@ -54,18 +55,18 @@ export const CreateServerModal = () => {
 
   const isModalOpen = isOpen && type === "createServer";
 
-  const form = useForm({
+  const form = useForm<ServerFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       imageUrl: "",
-      type: "",
+      type: "", // This should match one of the enum values
     }
   });
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: ServerFormData) => {
     try {
       await axios.post("/api/servers", values);
 
@@ -105,7 +106,7 @@ export const CreateServerModal = () => {
                       <FormControl>
                         <FileUpload
                           endpoint="serverImage"
-                          value={field.value}
+                          value={field.value || ""}
                           onChange={field.onChange}
                         />
                       </FormControl>
@@ -122,7 +123,7 @@ export const CreateServerModal = () => {
                     <FormLabel
                       className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70"
                     >
-                      Server name
+                      Clinic name
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -140,36 +141,26 @@ export const CreateServerModal = () => {
               <FormField
                 control={form.control}
                 name="type"
-                render={({ field }) => (
+                render={({ field: { onChange, value, ref } }) => (
                   <FormItem>
-                    <FormLabel
-                      className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70"
-                    >
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
                       Server type
                     </FormLabel>
                     <FormControl>
-                      {/* Replace this Input with a select element */}
                       <Select
-                        {...field}
-                        onValueChange={(value) => field.onChange(value)}
-                        defaultValue={field.value}
+                        value={value} // Manually pass the value
+                        onValueChange={onChange} // Manually handle changes
                       >
-                        <SelectTrigger
-                          className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
-                          <SelectValue placeholder="Choose one" />
-                          {/* The icon is already included in your SelectTrigger component */}
+                        <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
+                          <SelectValue>{value || "Choose type"}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          {/* Optional: Use SelectGroup and SelectLabel if you have categorized options */}
                           <SelectGroup>
                             <SelectItem value="questionnaire">Questionnaire</SelectItem>
                             <SelectItem value="mindmapper">Mindmapper</SelectItem>
-                            <SelectItem value="chat">Chat Server</SelectItem>
-                            {/* More items can be added here */}
-                            {/* Optional: Use SelectSeparator if you need to separate groups or items */}
-                            <SelectSeparator />
+                            <SelectItem value="chat">Chat</SelectItem>
                           </SelectGroup>
-                          {/* Additional groups/items can be added here */}
+                          <SelectSeparator />
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -177,6 +168,7 @@ export const CreateServerModal = () => {
                   </FormItem>
                 )}
               />
+
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
               <Button variant="primary" disabled={isLoading}>
